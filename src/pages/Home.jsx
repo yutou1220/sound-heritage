@@ -140,11 +140,11 @@ export default function Home() {
               color: 'from-purple-500/10 to-purple-500/5',
             },
             {
-              icon: '📊',
-              title: '频谱艺术',
-              desc: '让声音可视化——每一条声波都是一幅画',
-              to: '/create',
-              color: 'from-rose-500/10 to-rose-500/5',
+              icon: '🤖',
+              title: 'AI 音景生成',
+              desc: '勾选非遗声音，自动拼成一段有起承转合的场景',
+              to: '/create/soundscape',
+              color: 'from-emerald-500/10 to-emerald-500/5',
             },
           ].map((card) => (
             <Link
@@ -306,7 +306,7 @@ function VisitorCounter() {
 }
 
 // Mini China map component for homepage
-import { useEffect, useRef, useState as miniState } from 'react'
+import { useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import * as echarts from 'echarts'
 

@@ -1,6 +1,38 @@
 import { useState, useRef } from 'react'
 import { loadBuffer, schedulePlay, getCtx } from '../utils/audioDSP'
 
+// 每种氛围的生成参数：交叉淡化密度(overlap)、力度(baseGain)、滤波、选材倾向
+const MOOD_CONFIG = {
+  calm: {
+    overlap: 1.5,
+    baseGain: 0.4,
+    filterFreq: 2200,
+    softWords: /风|水|溪|流|飘|轻|柔|缓|慢|低|沉|静|鸣|唱|歌|鸟/,
+    intenseWords: /打|敲|锤|锻|碎|裂|爆|炸|碰|撞|击|鼓|锣|锯/,
+  },
+  tense: {
+    overlap: 0.5,
+    baseGain: 0.55,
+    filterFreq: 0,
+    softWords: /风|水|流|飘|轻|柔|缓|鸣/,
+    intenseWords: /打|敲|锤|锻|碎|裂|爆|炸|碰|撞|击|鼓|锣|锯|钟|铃/,
+  },
+  epic: {
+    overlap: 0.8,
+    baseGain: 0.6,
+    filterFreq: 0,
+    softWords: /风|水|流|飘|轻|缓/,
+    intenseWords: /打|敲|锤|锻|击|鼓|锣|钟|响|鸣|锻/,
+  },
+  dreamy: {
+    overlap: 2.0,
+    baseGain: 0.35,
+    filterFreq: 1500,
+    softWords: /风|水|溪|流|飘|轻|柔|缓|慢|低|沉|静|鸣|唱|歌|鸟/,
+    intenseWords: /打|敲|锤|锻|碎|裂|爆|炸|碰|撞|击|鼓/,
+  },
+}
+
 export default function AISoundscape({ sounds }) {
   const [selected, setSelected] = useState([])
   const [mood, setMood] = useState('calm')
@@ -20,32 +52,42 @@ export default function AISoundscape({ sounds }) {
     setGenerating(true)
     getCtx().resume()
 
-    // AI-style logic: sort sounds by character to create arc
+    const cfg = MOOD_CONFIG[mood] || MOOD_CONFIG.calm
+
+    // 按当前氛围给声音打分：软声在前、强声在后，形成「起承转合」
+    const textOf = (s) =>
+      `${s.name || ''} ${s.soundCharacteristic || ''} ${(s.keywords || []).join(' ')}`
     const sorted = [...selected].sort((a, b) => {
-      const nameA = (a.name + a.soundCharacteristic || '')
-      const nameB = (b.name + b.soundCharacteristic || '')
-      // Start with soft sounds, build to intense, end soft
-      const softWords = /风|水|溪|流|飘|轻|柔|缓|慢|低|沉/
-      const intenseWords = /打|敲|锤|锻|碎|裂|爆|炸|碰|撞|击|鼓/
-      const aSoft = softWords.test(nameA) ? -1 : intenseWords.test(nameA) ? 1 : 0
-      const bSoft = softWords.test(nameB) ? -1 : intenseWords.test(nameB) ? 1 : 0
-      return aSoft - bSoft
+      const ta = textOf(a)
+      const tb = textOf(b)
+      const aRank = cfg.softWords.test(ta) ? -1 : cfg.intenseWords.test(ta) ? 1 : 0
+      const bRank = cfg.softWords.test(tb) ? -1 : cfg.intenseWords.test(tb) ? 1 : 0
+      return aRank - bRank
     })
 
-    // Play each sound at staggered times with crossfade
     stop()
-    const step = duration / sorted.length
+    const step = duration / Math.max(sorted.length, 1)
+    // 起承转合增益曲线：首尾弱、中段强
+    const arcGain = (i) => {
+      const t = sorted.length <= 1 ? 0.5 : i / (sorted.length - 1)
+      return cfg.baseGain * (0.65 + 0.7 * Math.sin(t * Math.PI))
+    }
+
     sorted.forEach(async (sound, i) => {
       if (!sound.localAudio) return
       const buffer = await loadBuffer(sound.localAudio)
       const startTime = getCtx().currentTime + i * step
-      const playDuration = Math.min(buffer.duration, step * 2)
-      const fadeGain = i === 0 ? 0.5 : i === sorted.length - 1 ? 0.3 : 0.4
-      schedulePlay(buffer, startTime, { gain: fadeGain, duration: playDuration })
+      const playDuration = Math.min(buffer.duration, step * (1 + cfg.overlap))
+      schedulePlay(buffer, startTime, {
+        gain: arcGain(i),
+        duration: playDuration,
+        filterFreq: cfg.filterFreq || undefined,
+        filterType: 'lowpass',
+      })
     })
 
     // Audio context timer for play state
-    const endTime = getCtx().currentTime + duration
+    const endTime = getCtx().currentTime + duration + step * cfg.overlap
     setPlaying(true)
     timerRef.current = setInterval(() => {
       if (getCtx().currentTime >= endTime) {

@@ -2,71 +2,76 @@ import { useState, useRef, useCallback, useEffect } from 'react'
 import { getAudioContext } from '../utils/audioEngine'
 
 export default function AudioPlayer({ sound }) {
-  const hasAudio = !!sound?.localAudio
+  if (!sound?.localAudio) {
+    return <AudioPlayerPlaceholder />
+  }
+  return <AudioPlayerReal sound={sound} />
+}
 
-  // If no local audio, show "not yet imported" state
-  if (!hasAudio) {
-    return (
-      <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-8">
-        {/* Static waveform placeholder */}
-        <div className="relative mb-6 flex h-48 items-center justify-center overflow-hidden rounded-xl bg-white/[0.03]">
-          <div className="flex items-end gap-[2px] h-24 opacity-20">
-            {Array.from({ length: 64 }).map((_, i) => {
-              const h = 20 + Math.sin(i * 0.3) * 30 + Math.cos(i * 0.7) * 20
-              return (
-                <div
-                  key={i}
-                  className="w-[3px] rounded-full bg-amber-400/40"
-                  style={{ height: `${h}px` }}
-                />
-              )
-            })}
-          </div>
+function AudioPlayerPlaceholder() {
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-8">
+      {/* Static waveform placeholder */}
+      <div className="relative mb-6 flex h-48 items-center justify-center overflow-hidden rounded-xl bg-white/[0.03]">
+        <div className="flex items-end gap-[2px] h-24 opacity-20">
+          {Array.from({ length: 64 }).map((_, i) => {
+            const h = 20 + Math.sin(i * 0.3) * 30 + Math.cos(i * 0.7) * 20
+            return (
+              <div
+                key={i}
+                className="w-[3px] rounded-full bg-amber-400/40"
+                style={{ height: `${h}px` }}
+              />
+            )
+          })}
+        </div>
+      </div>
+
+      {/* Controls — disabled */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-3">
+          <span className="text-xs text-white/40 w-10 text-right">0:00</span>
+          <div className="relative flex-1 h-1.5 rounded-full bg-white/10" />
+          <span className="text-xs text-white/40 w-10">0:00</span>
         </div>
 
-        {/* Controls — disabled */}
-        <div className="space-y-4">
-          <div className="flex items-center gap-3">
-            <span className="text-xs text-white/40 w-10 text-right">0:00</span>
-            <div className="relative flex-1 h-1.5 rounded-full bg-white/10" />
-            <span className="text-xs text-white/40 w-10">0:00</span>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1">
-              <button disabled className="rounded-full p-2 text-white/20">
-                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0019 16V8a1 1 0 00-1.6-.8l-5.333 4zM4.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0011 16V8a1 1 0 00-1.6-.8l-5.334 4z" />
-                </svg>
-              </button>
-              <div className="rounded-full bg-white/10 p-3.5 text-white/20 relative group">
-                <svg className="ml-0.5 h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M8 5v14l11-7z" />
-                </svg>
-                {/* Tooltip: 暂未导入 */}
-                <span className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-amber-400/10 border border-amber-400/20 px-2.5 py-1 text-xs text-amber-400 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                  暂未导入
-                </span>
-              </div>
-              <button disabled className="rounded-full p-2 text-white/20">
-                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.933 12.8a1 1 0 000-1.6L6.6 7.2A1 1 0 005 8v8a1 1 0 001.6.8l5.333-4zM19.933 12.8a1 1 0 000-1.6l-5.333-4A1 1 0 0013 8v8a1 1 0 001.6.8l5.333-4z" />
-                </svg>
-              </button>
-            </div>
-            <div className="flex items-center gap-2 opacity-20">
-              <svg className="h-4 w-4 text-white/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072M17.95 6.05a8 8 0 010 11.9M6.5 8.8l-2.7 2.7H1.5v1h2.3l2.7 2.7h1.3V7.5H6.5z" />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1">
+            <button disabled className="rounded-full p-2 text-white/20">
+              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0019 16V8a1 1 0 00-1.6-.8l-5.333 4zM4.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0011 16V8a1 1 0 00-1.6-.8l-5.334 4z" />
               </svg>
-              <input type="range" min="0" max="1" disabled className="w-20 h-1" />
+            </button>
+            <div className="rounded-full bg-white/10 p-3.5 text-white/20 relative group">
+              <svg className="ml-0.5 h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M8 5v14l11-7z" />
+              </svg>
+              {/* Tooltip: 暂未导入 */}
+              <span className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-amber-400/10 border border-amber-400/20 px-2.5 py-1 text-xs text-amber-400 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                暂未导入
+              </span>
             </div>
+            <button disabled className="rounded-full p-2 text-white/20">
+              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.933 12.8a1 1 0 000-1.6L6.6 7.2A1 1 0 005 8v8a1 1 0 001.6.8l5.333-4zM19.933 12.8a1 1 0 000-1.6l-5.333-4A1 1 0 0013 8v8a1 1 0 001.6.8l5.333-4z" />
+              </svg>
+            </button>
+          </div>
+          <div className="flex items-center gap-2 opacity-20">
+            <svg className="h-4 w-4 text-white/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072M17.95 6.05a8 8 0 010 11.9M6.5 8.8l-2.7 2.7H1.5v1h2.3l2.7 2.7h1.3V7.5H6.5z" />
+            </svg>
+            <input type="range" min="0" max="1" disabled className="w-20 h-1" />
           </div>
         </div>
       </div>
-    )
-  }
+    </div>
+  )
+}
 
-  // === Has real audio (localAudio) ===
+function AudioPlayerReal({ sound }) {
+  const audioUrl = sound.localAudio
+
   const [playing, setPlaying] = useState(false)
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
@@ -80,8 +85,6 @@ export default function AudioPlayer({ sound }) {
   const startTimeRef = useRef(0)
   const pauseOffsetRef = useRef(0)
   const mountedRef = useRef(true)
-
-  const audioUrl = sound.localAudio
 
   // Cleanup on unmount
   useEffect(() => {

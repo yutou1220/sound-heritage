@@ -2,6 +2,7 @@ import { useParams, Link } from 'react-router-dom'
 import { useEffect } from 'react'
 import { getSoundById } from '../utils/sounds'
 import { addHistory, addFavorite, removeFavorite, isFavorite } from '../utils/auth'
+import { downloadPoster } from '../utils/poster'
 import AudioPlayer from '../components/AudioPlayer'
 import SpectrumVisualizer from '../components/SpectrumVisualizer'
 import { useState } from 'react'
@@ -29,6 +30,8 @@ export default function SoundDetail() {
       </div>
     )
   }
+
+  const audioExt = sound.localAudio ? (sound.localAudio.split('.').pop() || 'mp3') : 'mp3'
 
   return (
     <div className="mx-auto max-w-4xl px-6 py-12">
@@ -99,10 +102,27 @@ export default function SoundDetail() {
               >
                 🎧 白噪音模式
               </Link>
-              <button className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/70 transition-colors hover:border-amber-400/30 hover:text-amber-400">
-                📥 下载采样
-              </button>
-              <button className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/70 transition-colors hover:border-amber-400/30 hover:text-amber-400">
+              {sound.localAudio ? (
+                <a
+                  href={sound.localAudio}
+                  download={`${sound.name}.${audioExt}`}
+                  className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-center text-sm text-white/70 transition-colors hover:border-amber-400/30 hover:text-amber-400"
+                >
+                  📥 下载采样
+                </a>
+              ) : (
+                <button
+                  disabled
+                  title="该声音暂未导入本地音频"
+                  className="cursor-not-allowed rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/30"
+                >
+                  📥 下载采样
+                </button>
+              )}
+              <button
+                onClick={() => downloadPoster(sound)}
+                className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/70 transition-colors hover:border-amber-400/30 hover:text-amber-400"
+              >
                 🖼 生成海报
               </button>
             </div>
