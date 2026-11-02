@@ -1,9 +1,9 @@
-import { getAllSounds } from '../utils/sounds'
+import { getLabSounds } from '../utils/sounds'
 import SpatialMixer from '../components/SpatialMixer'
 import { Link } from 'react-router-dom'
 
 export default function SpatialMixerPage() {
-  const allSounds = getAllSounds()
+  const allSounds = getLabSounds()
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-12">

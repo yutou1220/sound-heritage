@@ -1,7 +1,25 @@
 import soundsData from '../data/sounds_data.json'
+import { getUserUploads } from './auth'
 
 export function getAllSounds() {
   return soundsData
+}
+
+// 声音实验室专用：内置声音 + 用户上传的声音（含音频的）
+// 上传音频以 data URL 存储，这里统一映射到 localAudio，让各处理组件直接复用
+export function getLabSounds() {
+  const uploads = getUserUploads()
+    .filter((u) => u.audioDataUrl)
+    .map((u) => ({
+      ...u,
+      localAudio: u.audioDataUrl,
+      isUserUpload: true,
+    }))
+  return [...uploads, ...soundsData]
+}
+
+export function getLabSoundById(id) {
+  return getLabSounds().find((s) => s.id === id) || null
 }
 
 export function getSoundById(id) {

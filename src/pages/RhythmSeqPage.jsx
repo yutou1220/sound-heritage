@@ -1,14 +1,17 @@
-import { getAllSounds } from '../utils/sounds'
+import { getLabSounds } from '../utils/sounds'
 import RhythmSequencer from '../components/RhythmSequencer'
 import { Link } from 'react-router-dom'
 
 export default function RhythmSeqPage() {
-  const allSounds = getAllSounds()
-  const shortSounds = allSounds.filter((s) =>
+  const labSounds = getLabSounds()
+  const myUploads = labSounds.filter((s) => s.isUserUpload)
+  const builtin = labSounds.filter((s) => !s.isUserUpload)
+  const shortSounds = builtin.filter((s) =>
     /打|敲|锤|锻|鼓|锣|织|锯|刨|击|碎|裂|碰|撞|摔|砸|弹|响|叫|鸣|钟|铃/.test(
       (s.name || '') + (s.keywords || []).join('')
     )
   )
+  const sounds = [...myUploads, ...(shortSounds.length > 0 ? shortSounds : builtin)]
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-12">
@@ -19,7 +22,7 @@ export default function RhythmSeqPage() {
           把短声音变成打击乐——三种模式：网格编排循环播放、打击垫即兴敲击、键盘实时演奏
         </p>
       </div>
-      <RhythmSequencer sounds={shortSounds.length > 0 ? shortSounds : allSounds} />
+      <RhythmSequencer sounds={sounds} />
     </div>
   )
 }

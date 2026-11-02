@@ -1,6 +1,7 @@
+import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { getUserFavorites, getUserHistory, getUserUploads, removeFavorite, logoutLocal } from '../utils/auth'
+import { getUserFavorites, getUserHistory, getUserUploads, removeFavorite } from '../utils/auth'
 import { getAllSounds } from '../utils/sounds'
 
 export default function UserSpace() {
@@ -149,7 +150,19 @@ export default function UserSpace() {
                 <div key={sound.id} className="rounded-xl border border-white/10 bg-white/[0.02] p-4">
                   <p className="text-sm font-medium text-white">{sound.name}</p>
                   <p className="mt-1 text-xs text-white/40">{sound.category || '未分类'} · {sound.region || '未知区域'}</p>
-                  <p className="mt-2 text-xs text-white/20">{new Date(sound.uploadedAt).toLocaleDateString('zh-CN')}</p>
+                  <div className="mt-2 flex items-center justify-between">
+                    <span className="text-xs text-white/20">{new Date(sound.uploadedAt).toLocaleDateString('zh-CN')}</span>
+                    {sound.audioDataUrl ? (
+                      <Link
+                        to={`/create/whitenoise?sound=${sound.id}`}
+                        className="text-xs text-amber-400 hover:underline"
+                      >
+                        🎛 处理 →
+                      </Link>
+                    ) : (
+                      <span className="text-xs text-white/20">未附音频</span>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -159,5 +172,3 @@ export default function UserSpace() {
     </div>
   )
 }
-
-import { useState } from 'react'
