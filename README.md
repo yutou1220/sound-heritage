@@ -1,16 +1,77 @@
-# React + Vite
+# 声纹遗产库 · Sound Heritage Library
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+> 非物质文化遗产声音的数字化保护与沉浸式传播平台
 
-Currently, two official plugins are available:
+「声纹遗产库」以非遗中的**声音**为对象——传统音乐、传统戏曲、民俗与人声、手艺劳作、自然与生活等，这些极易流失却承载文化记忆的声音，在这里被集中采集、整理、归档，并借助 Web Audio 技术转化为可聆听、可检索、可交互创作的沉浸式体验。
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+线上地址：**https://shengwen-legacy.vercel.app**
 
-## React Compiler
+---
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## ✨ 功能特性
 
-## Expanding the Oxlint configuration
+| 模块 | 说明 |
+| --- | --- |
+| 声音库 | 301 条声音的分类筛选与关键词检索、在线播放 |
+| 声音地图 | 按地区可视化浏览声音分布 |
+| 声音详情 | 声音信息、内容描述、声音特点、来源与授权、下载、海报生成 |
+| AI 音景 | 选声音 + 选氛围（平静/紧张/史诗/梦幻），自动编排沉浸式音景 |
+| 3D 空间混音器 | 声源空间定位与移动混音 |
+| 节奏编排器 | 节奏音序式的声音编排 |
+| 声音特效处理器 | 滤波、变速、回声等实时特效 |
+| 白噪音生成器 | 专注 / 放松 / 助眠场景白噪音 |
+| 用户系统 | 注册登录、收藏、浏览历史、上传管理（本地存储） |
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+## 📊 数据规模
+
+- **301 条**声音，**154 条**本地音频
+- **6 大分类**：传统音乐、传统戏曲、民俗与人声、手艺类、传统手工艺、自然与生活
+- 覆盖 **43 个**地区
+- 每条声音含：名称、分类、地区、来源、授权方式、关键词、声音特征、文化故事等元数据
+
+## 🛠 技术栈
+
+- **前端**：React 19 + Vite + Tailwind CSS + ECharts
+- **音频**：Web Audio API 自研引擎（调度、滤波、增益、立体声定位、频谱分析）
+- **数据**：结构化 JSON（`src/data/sounds_data.json`）+ localStorage 用户数据
+- **计划接入**：Supabase 后端（账号体系与数据沉淀）
+
+## 🚀 快速开始
+
+```bash
+# 安装依赖
+npm install
+
+# 启动开发服务器
+npm run dev
+# 浏览器打开 http://localhost:5173
+
+# 生产构建
+npm run build
+
+# 预览构建产物
+npm run preview
+```
+
+## 📁 项目结构
+
+```
+src/
+├── pages/          # 12 个页面路由
+├── components/     # 音频播放器、频谱可视化、空间混音器等
+├── data/           # sounds_data.json 声音数据库
+├── utils/          # 音频 DSP 引擎、鉴权、海报生成等
+└── context/        # 用户鉴权上下文
+public/audio/       # 本地音频文件
+```
+
+## 🌐 部署
+
+- 线上：https://shengwen-legacy.vercel.app（Vercel）
+- 仓库：https://github.com/yutou1220/sound-heritage
+
+## 📄 数据来源与授权
+
+声音采集自公开音源平台（爱给网、CC 音效库、光厂网 VJshi、耳聆网、淘声网等），每条声音均记录来源平台与授权方式（免费 / CC / VIP）。详见《数据来源与授权说明》。
+
+> 本项目为「大学生创新创业训练计划」项目，用于非遗声音的数字化保护与传播。
